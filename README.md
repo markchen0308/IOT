@@ -1,1 +1,1 @@
-This project is fo BLE IOT test
+This project is for BLE IOT test
