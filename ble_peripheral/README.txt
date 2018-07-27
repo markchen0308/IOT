@@ -16,6 +16,6 @@ $reboot
 $sudo hciconfig hci0 up
 
 5.run the index.js in dist directory
-$nodejs index.js
+$sudo nodejs index.js
 
 #6. Using nRF Connect App on mobile phone to connect the   peripheral
