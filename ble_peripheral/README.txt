@@ -1,4 +1,4 @@
-This project teach how to use nodejs ble module 'bleno' to play ble as peripheral
+This project teaches how to use nodejs ble module 'bleno' to play ble as peripheral
 
 
 1. install bluetooth module
