@@ -6,6 +6,13 @@ let Sensor01UUID; //sensor 01 UUID
 let LightUUID; //light 01 UUID
 class BluetoothController {
     constructor(serviceUUID, sensor01UUID, lightUUID) {
+        this.peripheral_sensor = null;
+        this.peripheral_Light = null;
+        this.charSensor = null;
+        this.charLight = null;
+        this.peripheral_sensor_mac = 'c2339c3e707c';
+        this.peripheral_light_mac = 'ddddd';
+        this.peripheral_sensor_data = '';
         ServiceUUID = serviceUUID; //savve service UUID
         Sensor01UUID = sensor01UUID;
         LightUUID = lightUUID;
@@ -15,64 +22,71 @@ class BluetoothController {
         Noble.on('stateChange', state => {
             if (state === 'poweredOn') {
                 console.log('Scanning');
-                // Noble.startScanning([ServiceUUID]);
-                Noble.startScanning();
+                Noble.startScanning([ServiceUUID]);
+                //Noble.startScanning();
             }
             else {
                 Noble.stopScanning();
             }
         });
         Noble.on('discover', peripheral => {
-            // connect to the first peripheral that is scanned
-            let address = peripheral.id;
-            let x = peripheral.advertisement;
-            // let serviceUuid=peripheral.id;
-            //let serviceUuid=peripheral.advertisement.serviceData;
-            console.log(address);
-            Noble.startScanning();
-            // console.log(serviceUuid)
-            // console.log('Connecting to name ' '${name}' ${peripheral.id}`);
-            //connectAndSetUp(peripheral);
+            let Mac_Address = peripheral.id;
+            if (Mac_Address == this.peripheral_sensor_mac) {
+                console.log("Found sensor Mac ADDRESS:" + Mac_Address);
+                console.log("start to connect");
+                this.peripheral_sensor = peripheral;
+                this.peripheral_sensor.connect(error => {
+                    this.peripheral_sensor.discoverSomeServicesAndCharacteristics([ServiceUUID], [Sensor01UUID], (error, services, characteristics) => {
+                        this.charSensor = characteristics[0];
+                        this.charSensor.subscribe(error => {
+                            if (error) {
+                                console.error('Error subscribing to echoCharacteristic');
+                            }
+                            else {
+                                console.log('Subscribed for echoCharacteristic notifications');
+                            }
+                        });
+                        // data callback receives notifications
+                        this.charSensor.on('data', (data, isNotification) => {
+                            this.saveSensorData(data);
+                        });
+                    });
+                });
+                this.peripheral_sensor.on('disconnect', () => {
+                    console.log('sensor is disconnected');
+                    this.peripheral_sensor = null;
+                    this.charSensor = null;
+                    this.saveSensorData('');
+                });
+            }
+            else if (Mac_Address == this.peripheral_light_mac) {
+                console.log("Found Light Mac ADDRESS:" + Mac_Address);
+                console.log("start to connect");
+                this.peripheral_Light = peripheral;
+                this.peripheral_Light.connect(error => {
+                    this.peripheral_Light.discoverSomeServicesAndCharacteristics([ServiceUUID], [LightUUID], (error, services, characteristics) => {
+                        this.charLight = characteristics[0];
+                    });
+                });
+                this.peripheral_Light.on('disconnect', () => {
+                    console.log('Light is disconnected');
+                    this.peripheral_Light = null;
+                    this.charLight = null;
+                });
+            }
         });
     }
-    connectAndSetUp(peripheral) {
-        peripheral.connect(error => {
-            console.log('Connected to', peripheral.id);
-            // specify the services and characteristics to discover
-            //const serviceUUIDs = [ECHO_SERVICE_UUID];
-            // const characteristicUUIDs = [ECHO_CHARACTERISTIC_UUID];
-            peripheral.discoverSomeServicesAndCharacteristics(
-            //  serviceUUIDs,
-            //   characteristicUUIDs,
-            //   onServicesAndCharacteristicsDiscovered
-            );
-        });
-        peripheral.on('disconnect', () => console.log('disconnected'));
+    saveSensorData(data) {
+        this.peripheral_sensor_data = data;
     }
-    onServicesAndCharacteristicsDiscovered(error, services, characteristics) {
-        console.log('Discovered services and characteristics');
-        const echoCharacteristic = characteristics[0];
-        // data callback receives notifications
-        echoCharacteristic.on('data', (data, isNotification) => {
-            console.log('Received: "' + data + '"');
-        });
-        // subscribe to be notified whenever the peripheral update the characteristic
-        echoCharacteristic.subscribe(error => {
-            if (error) {
-                console.error('Error subscribing to echoCharacteristic');
-            }
-            else {
-                console.log('Subscribed for echoCharacteristic notifications');
-            }
-        });
-        // create an interval to send data to the service
-        let count = 0;
-        setInterval(() => {
-            count++;
-            const message = new Buffer('hello, ble ' + count, 'utf-8');
-            console.log("Sending:  '" + message + "'");
-            echoCharacteristic.write(message);
-        }, 2500);
+    readSensorData() {
+        return this.peripheral_sensor_data;
+    }
+    writeLight(str) {
+        if (this.charLight != null) {
+            let data = new Buffer(str, 'utf-8');
+            this.charLight.write(data, true);
+        }
     }
 }
 exports.BluetoothController = BluetoothController;
