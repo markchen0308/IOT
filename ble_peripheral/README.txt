@@ -1,4 +1,4 @@
-This project teach how to use nodejs ble module 'bleno' to play ble as peripheral
+This project teaches how to use nodejs ble module 'bleno' to play ble as peripheral
 
 
 1. install bluetooth module
@@ -16,7 +16,7 @@ $reboot
 $sudo hciconfig hci0 up
 
 5.run the index.js in dist directory
-$sudo nodejs index.js
+$sudo node index.js
 
 
 #6. Using nRF Connect App on mobile phone to connect the   peripheral
