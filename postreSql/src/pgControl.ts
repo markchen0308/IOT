@@ -2,6 +2,7 @@ import { Client, QueryResult } from 'pg'
 
 
 let isDelTable: boolean = false;
+
 export class PgControl {
 
 
@@ -15,7 +16,7 @@ export class PgControl {
 
 
 
-    createTableCmd: string = 'CREATE TABLE IF NOT EXISTS tableSensor(id serial PRIMARY KEY , info JSONB, saveTime timestamp without time zone DEFAULT now())';
+    createTableCmd: string = 'CREATE TABLE IF NOT EXISTS tableSensor(id serial PRIMARY KEY , info JSONB, saveTime timestamp WITH TIME ZONE DEFAULT now())';
     insertCmd: string = 'INSERT INTO tableSensor(info) VALUES($1)';
     queryAllCmd: string = 'SELECT * FROM tableSensor';
     queryFirstCmd: string = 'SELECT * FROM tableSensor ORDER BY id ASC LIMIT 1';
@@ -23,11 +24,7 @@ export class PgControl {
     delAllCmd: string = 'DELETE FROM tableSensor';
     dropTableCmd: string = 'DROP TABLE IF EXISTS tableSensor'
 
-    saveData = {
-        temp: 10,
-        humidity: 100,
-        light: 1
-    };
+  
 
 
     constructor() {
@@ -42,8 +39,8 @@ export class PgControl {
         }
         await this.createTable();
         await this.writeToDB(21, 50, true);
-        //await this.readAllDB();
-        await this.readLastDB();
+        await this.readAllDB();
+       // await this.readLastDB();
     }
 
     async connectDB() {
@@ -76,7 +73,12 @@ export class PgControl {
     async readAllDB() {
         const res = await this.pgClient.query(this.queryAllCmd);
         res.rows.forEach(row => {
-            console.log(row);
+            console.log('id=');
+            console.log(row.id);
+            console.log('info=');
+            console.log(row.info);
+            console.log('savetime=');
+            console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
     }
 
@@ -84,14 +86,24 @@ export class PgControl {
     async readFistDB() {
         const res = await this.pgClient.query(this.queryFirstCmd);
         res.rows.forEach(row => {
-            console.log(row);
+            console.log('id=');
+            console.log(row.id);
+            console.log('info=');
+            console.log(row.info);
+            console.log('savetime=');
+            console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
     }
 
     async readLastDB() {
         const res = await this.pgClient.query(this.queryLastCmd);
         res.rows.forEach(row => {
-            console.log(row);
+            console.log('id=');
+            console.log(row.id);
+            console.log('info=');
+            console.log(row.info);
+            console.log('savetime=');
+            console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
     }
 
