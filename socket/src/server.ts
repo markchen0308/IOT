@@ -8,7 +8,6 @@ let preamble: number = 0x55;
 let temperature: number = 0;
 let humidity: number = 0;
 
-
 console.log('server on');
 Net.createServer((sock) => {
 
