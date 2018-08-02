@@ -1,6 +1,4 @@
-import * as Net from 'net';
-
-
+import * as Net from 'net';//import socket module
 
 let HOST: string = '127.0.0.1';
 let PORT: number = 6969;
@@ -28,10 +26,7 @@ Net.createServer((sock) => {
             console.log('received data error');
             //reply data to server
             sock.write('104');//200:ok,104:fail
-
         }
-
-
     });
 
     //client close event
