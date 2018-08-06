@@ -1,4 +1,5 @@
 import * as Noble from 'noble';//import noble
+import * as CP from 'child_process';//module for deal with system command
 
 let ServiceUUID: string;//service UUID
 let Sensor01UUID: string;//sensor 01 UUID
@@ -14,18 +15,37 @@ export class BluetoothController {
     charLight: Noble.Characteristic = null;////Characteristic of Light 
     peripheral_sensor_TH_mac: string = 'c2339c3e707c';//mac address of temperature and humidity sensor
     peripheral_sensor_pir_mac: string = 'c04c0feb4f9e'//mac address of PIR sensor
-    peripheral_light_mac: string = 'ddddd';
+    peripheral_light_mac: string = 'ddddd';//mac address of light
     peripheral_TH_sensor_data: string = '';//temperature and humidity sensor data
     peripheral_pir_sensor_data: string = '';//pri sensor data
 
+    bleStatus: boolean;//check if ble is turned on
+    BLE_START_CMD: string = 'hciconfig hci0 up';//command for turning up BLE
 
+    //ble initialize
     constructor(serviceUUID: string, sensor01UUID: string, lightUUID: string) {
         ServiceUUID = serviceUUID;//savve service UUID
         Sensor01UUID = sensor01UUID;
         LightUUID = lightUUID;
-        this.bleControl();
+        this.checkBleTurnOn();
 
     }
+
+
+    checkBleTurnOn() {
+       CP.exec(this.BLE_START_CMD, (err: Error, stdout: string, stderr: string) => {
+            if (err) {
+                this.bleStatus = false;
+                console.log('Can not turn on ble:' + stderr);
+            }
+            else {
+                this.bleStatus = true;
+                console.log('ble is turned on');
+                this.bleControl();//run ble scan process
+            }
+        });
+    }
+
 
     public bleControl() {
 
@@ -46,8 +66,8 @@ export class BluetoothController {
 
             if (Mac_Address == this.peripheral_sensor_TH_mac)//get temperature and humidity address
             {
-                console.log("Found sensor Mac ADDRESS:" + Mac_Address);
-                console.log("start to connect");
+                console.log("Found TH sensor Mac:" + Mac_Address);
+                console.log("start to connect TH sensor");
                 this.peripheral_sensor_TH = peripheral;
                 this.peripheral_sensor_TH.connect(error => {
                     this.peripheral_sensor_TH.discoverSomeServicesAndCharacteristics(
@@ -79,8 +99,8 @@ export class BluetoothController {
             }
             else if (Mac_Address == this.peripheral_sensor_pir_mac)//get pir address
             {
-                console.log("Found PIR sensor Mac ADDRESS:" + Mac_Address);
-                console.log("start to connect");
+                console.log("Found PIR sensor Mac:" + Mac_Address);
+                console.log("start to connect PIR sensor");
                 this.peripheral_sensor_pir = peripheral;
                 this.peripheral_sensor_pir.connect(error => {
                     this.peripheral_sensor_pir.discoverSomeServicesAndCharacteristics(
