@@ -30,6 +30,7 @@ function readSensor() {
 }
 //system start 
 function SystemStart() {
+    console.log("Start to run IOT System.");
     //turn up ble
     CP.exec(BLE_START_CMD, (err, stdout, stderr) => {
         if (err) {
