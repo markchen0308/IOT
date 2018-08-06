@@ -12,7 +12,9 @@ $sudo systemctl stop bluetooth
 $sudo systemctl disable bluetooth 
 $reboot
 
-
+4.remove node_modules and reinstall
+$rm -rf node_modules
+$yarn install
 
 4.run the index.js in dist directory
 $sudo nodejs index.js
