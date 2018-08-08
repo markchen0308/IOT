@@ -13,9 +13,10 @@ export class BluetoothController {
     charSensorTH: Noble.Characteristic = null;//Characteristic of temperature and humidity sensor
     charSensorPir: Noble.Characteristic = null;//Characteristic of PIR sensor
     charLight: Noble.Characteristic = null;////Characteristic of Light 
+    charLightRead: Noble.Characteristic = null;////Characteristic of Light
     peripheral_sensor_TH_mac: string = 'c2339c3e707c';//mac address of temperature and humidity sensor
     peripheral_sensor_pir_mac: string = 'c04c0feb4f9e'//mac address of PIR sensor
-    peripheral_light_mac: string = 'ddddd';//mac address of light
+    peripheral_light_mac: string = 'edea3e52d2ff';//mac address of light
     peripheral_TH_sensor_data: string = '';//temperature and humidity sensor data
     peripheral_pir_sensor_data: string = '';//pri sensor data
 
@@ -33,7 +34,7 @@ export class BluetoothController {
 
 
     checkBleTurnOn() {
-       CP.exec(this.BLE_START_CMD, (err: Error, stdout: string, stderr: string) => {
+        CP.exec(this.BLE_START_CMD, (err: Error, stdout: string, stderr: string) => {
             if (err) {
                 this.bleStatus = false;
                 console.log('Can not turn on ble:' + stderr);
@@ -136,12 +137,35 @@ export class BluetoothController {
                 console.log("start to connect");
                 this.peripheral_Light = peripheral;
                 this.peripheral_Light.connect(error => {
-                    this.peripheral_Light.discoverSomeServicesAndCharacteristics(
-                        [ServiceUUID],
-                        [LightUUID],
-                        (error: string, services: Noble.Service[], characteristics: Noble.Characteristic[]) => {
-                            this.charLight = characteristics[0];
-                        });
+                    if (error) {
+                        console.log("connect light fail!");
+                    }
+                    else {
+                        console.log("connect light ok!");
+                        this.peripheral_Light.discoverSomeServicesAndCharacteristics(
+                            [ServiceUUID],
+                            [LightUUID, Sensor01UUID],
+                            (error: string, services: Noble.Service[], characteristics: Noble.Characteristic[]) => {
+                                this.charLight = characteristics[0];
+                                this.charLightRead = characteristics[1];
+                                this.charLightRead.subscribe(error => {
+                                    if (error) {
+                                        console.error('Error subscribing to Characteristic of PIR');
+                                    } else {
+                                        console.log('Subscribed for Characteristic of PIR notifications');
+                                    }
+                                });
+                                // data callback receives notifications
+                                this.charLightRead.on('data', (data, isNotification) => {
+                                   // console.log('get light data:' + data);
+                                });
+
+
+
+
+                            });
+                    }
+
                 });
                 this.peripheral_Light.on('disconnect', () => {
                     console.log('Light is disconnected');
@@ -175,8 +199,16 @@ export class BluetoothController {
     //write data to light
     public writeLight(str: string) {
         if (this.charLight != null) {
-            let data = new Buffer(str, 'utf-8');
-            this.charLight.write(data, true);
+            let data = new Buffer(str,'utf8');
+            this.charLight.write(data, true, (error) => {
+                if (error) {
+                    //console.log('write error ');
+                }
+                else {
+                  // console.log('write ok');
+                }
+
+            });
         }
     }
 

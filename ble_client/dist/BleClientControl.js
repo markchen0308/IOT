@@ -14,9 +14,10 @@ class BluetoothController {
         this.charSensorTH = null; //Characteristic of temperature and humidity sensor
         this.charSensorPir = null; //Characteristic of PIR sensor
         this.charLight = null; ////Characteristic of Light 
+        this.charLightRead = null; ////Characteristic of Light
         this.peripheral_sensor_TH_mac = 'c2339c3e707c'; //mac address of temperature and humidity sensor
         this.peripheral_sensor_pir_mac = 'c04c0feb4f9e'; //mac address of PIR sensor
-        this.peripheral_light_mac = 'ddddd'; //mac address of light
+        this.peripheral_light_mac = 'edea3e52d2ff'; //mac address of light
         this.peripheral_TH_sensor_data = ''; //temperature and humidity sensor data
         this.peripheral_pir_sensor_data = ''; //pri sensor data
         this.BLE_START_CMD = 'hciconfig hci0 up'; //command for turning up BLE
@@ -116,9 +117,28 @@ class BluetoothController {
                 console.log("start to connect");
                 this.peripheral_Light = peripheral;
                 this.peripheral_Light.connect(error => {
-                    this.peripheral_Light.discoverSomeServicesAndCharacteristics([ServiceUUID], [LightUUID], (error, services, characteristics) => {
-                        this.charLight = characteristics[0];
-                    });
+                    if (error) {
+                        console.log("connect light fail!");
+                    }
+                    else {
+                        console.log("connect light ok!");
+                        this.peripheral_Light.discoverSomeServicesAndCharacteristics([ServiceUUID], [LightUUID, Sensor01UUID], (error, services, characteristics) => {
+                            this.charLight = characteristics[0];
+                            this.charLightRead = characteristics[1];
+                            this.charLightRead.subscribe(error => {
+                                if (error) {
+                                    console.error('Error subscribing to Characteristic of PIR');
+                                }
+                                else {
+                                    console.log('Subscribed for Characteristic of PIR notifications');
+                                }
+                            });
+                            // data callback receives notifications
+                            this.charLightRead.on('data', (data, isNotification) => {
+                                // console.log('get light data:' + data);
+                            });
+                        });
+                    }
                 });
                 this.peripheral_Light.on('disconnect', () => {
                     console.log('Light is disconnected');
@@ -147,8 +167,15 @@ class BluetoothController {
     //write data to light
     writeLight(str) {
         if (this.charLight != null) {
-            let data = new Buffer(str, 'utf-8');
-            this.charLight.write(data, true);
+            let data = new Buffer(str, 'utf8');
+            this.charLight.write(data, true, (error) => {
+                if (error) {
+                    //console.log('write error ');
+                }
+                else {
+                    // console.log('write ok');
+                }
+            });
         }
     }
 }
