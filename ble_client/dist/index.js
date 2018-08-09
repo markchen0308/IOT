@@ -26,31 +26,6 @@ function readSensor() {
                 console.log(time + " temperature=" + temp.toString() + ' C;' + 'Humidity=' + humidity.toString() + ' %');
             }
         }
-        //read PIR sensor data
-        rx_PIR_sensor = ble.readPIRSensorData();
-        if (rx_PIR_sensor != '') {
-            //console.log(time + ' PIR sensor =' + rx_PIR_sensor);
-            let rx = rx_PIR_sensor.toString().split(";");
-            if (parseInt(rx[0]) == 55) //is preamble= 55
-             {
-                if (parseInt(rx[1]) == 1) {
-                    if (ble.charLight != null) {
-                        console.log(time + ' There is person=>Turn on light');
-                        ble.writeLight('1');
-                    }
-                }
-                else if (parseInt(rx[1]) == 0) {
-                    if (ble.charLight != null) {
-                        console.log(time + ' There is no person=>Turn off light');
-                        ble.writeLight('0');
-                    }
-                }
-                else {
-                    console.log('PIR sensor protocol error!');
-                }
-            }
-            //control light function here according to PIR value 
-        }
     }, 1000);
 }
 //system start 

@@ -21,6 +21,7 @@ class BluetoothController {
         this.peripheral_TH_sensor_data = ''; //temperature and humidity sensor data
         this.peripheral_pir_sensor_data = ''; //pri sensor data
         this.BLE_START_CMD = 'hciconfig hci0 up'; //command for turning up BLE
+        this.lightStatus = 0;
         ServiceUUID = serviceUUID; //savve service UUID
         Sensor01UUID = sensor01UUID;
         LightUUID = lightUUID;
@@ -154,7 +155,31 @@ class BluetoothController {
     }
     //save PIR sensor data
     savePirSensorData(data) {
-        this.peripheral_pir_sensor_data = data;
+        if (data != '') {
+            //console.log(time + ' PIR sensor =' + rx_PIR_sensor);
+            let rx = data.toString().split(";");
+            if (parseInt(rx[0]) == 55) //is preamble= 55
+             {
+                let x = parseInt(rx[1]);
+                if (x != this.lightStatus) //status is not same as the former 
+                 {
+                    this.lightStatus = x;
+                    if (this.lightStatus == 1) {
+                        if (this.charLight != null) {
+                            console.log((new Date()).toLocaleString() + ' Detected people => Turn on light');
+                            this.writeLight('1');
+                        }
+                    }
+                    else if (this.lightStatus == 0) {
+                        if (this.charLight != null) {
+                            console.log((new Date()).toLocaleString() + ' Nobody => Turn off light');
+                            this.writeLight('0');
+                        }
+                    }
+                }
+            }
+            //control light function here according to PIR value 
+        }
     }
     // read temperature and humidity sensor data
     readTHSensorData() {

@@ -5,6 +5,7 @@ let ServiceUUID: string;//service UUID
 let Sensor01UUID: string;//sensor 01 UUID
 let LightUUID: string;//light 01 UUID
 
+
 export class BluetoothController {
 
     peripheral_sensor_TH: Noble.Peripheral = null;
@@ -22,7 +23,7 @@ export class BluetoothController {
 
     bleStatus: boolean;//check if ble is turned on
     BLE_START_CMD: string = 'hciconfig hci0 up';//command for turning up BLE
-
+    lightStatus: number = 0;
     //ble initialize
     constructor(serviceUUID: string, sensor01UUID: string, lightUUID: string) {
         ServiceUUID = serviceUUID;//savve service UUID
@@ -157,7 +158,7 @@ export class BluetoothController {
                                 });
                                 // data callback receives notifications
                                 this.charLightRead.on('data', (data, isNotification) => {
-                                   // console.log('get light data:' + data);
+                                    // console.log('get light data:' + data);
                                 });
 
 
@@ -183,7 +184,37 @@ export class BluetoothController {
 
     //save PIR sensor data
     public savePirSensorData(data: string) {
-        this.peripheral_pir_sensor_data = data;
+
+        if (data != '') {
+            //console.log(time + ' PIR sensor =' + rx_PIR_sensor);
+            let rx = data.toString().split(";");
+            if (parseInt(rx[0]) == 55) //is preamble= 55
+            {
+                let x: number = parseInt(rx[1]);
+                if (x != this.lightStatus) //status is not same as the former 
+                    {
+                    this.lightStatus = x;
+                    if (this.lightStatus == 1) {
+                        if (this.charLight != null) {
+                            console.log((new Date()).toLocaleString() + ' Detected people => Turn on light');
+                            this.writeLight('1');
+                        }
+                    }
+                    else if (this.lightStatus == 0) {
+                        if (this.charLight != null) {
+                            console.log((new Date()).toLocaleString() + ' Nobody => Turn off light');
+                            this.writeLight('0');
+                        }
+                    }
+                }
+
+
+
+            }
+            //control light function here according to PIR value 
+        }
+
+
     }
 
     // read temperature and humidity sensor data
@@ -199,13 +230,13 @@ export class BluetoothController {
     //write data to light
     public writeLight(str: string) {
         if (this.charLight != null) {
-            let data = new Buffer(str,'utf8');
+            let data = new Buffer(str, 'utf8');
             this.charLight.write(data, true, (error) => {
                 if (error) {
                     //console.log('write error ');
                 }
                 else {
-                  // console.log('write ok');
+                    // console.log('write ok');
                 }
 
             });
