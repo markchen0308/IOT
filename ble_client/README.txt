@@ -12,11 +12,10 @@ $sudo systemctl stop bluetooth
 $sudo systemctl disable bluetooth 
 $reboot
 
-4.Use sudo hciconfig hci0 up to power Bluetooth adapter up after stopping or disabling bluetoothd
-$sudo hciconfig hci0 up
+4.remove node_modules and reinstall
+$rm -rf node_modules
+$yarn install
 
-5.run the index.js in dist directory
+4.run the index.js in dist directory
 $sudo nodejs index.js
 
-
-#6. Using nRF Connect App on mobile phone to connect the   peripheral
