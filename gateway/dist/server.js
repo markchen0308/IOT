@@ -100,7 +100,7 @@ function WebserverServerStart() {
         });
     }).listen(PORT_Webserver, HOST); //listen host
 }
-//parser data from ble client
+//parser data from webserver client
 function parserWebserverClientData(data) {
     let rx = JSON.parse(data);
     let protocolData = {
