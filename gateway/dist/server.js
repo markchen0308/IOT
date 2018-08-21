@@ -134,6 +134,5 @@ function writeLightControlNow2WebserverClient(cmdtype, cmdData) {
     write2WebserverClient(cmdtype, cmdData);
 }
 setTimeout(() => {
-    serverStart();
-    //send data per 1 second
+    serverStart(); //start server after 1 second
 }, 1000);
