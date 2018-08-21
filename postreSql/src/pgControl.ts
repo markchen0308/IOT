@@ -1,4 +1,5 @@
 import { Client, QueryResult } from 'pg'
+import { promises } from 'fs';
 
 
 let isDelTable: boolean = false;
@@ -24,41 +25,47 @@ export class PgControl {
     delAllCmd: string = 'DELETE FROM tableSensor';
     dropTableCmd: string = 'DROP TABLE IF EXISTS tableSensor'
 
-  
+
 
 
     constructor() {
 
-        this.begin();
+        // this.begin();
     }
-
-    async begin() {
-        await this.connectDB();
+    
+    //create table
+    async begin(): Promise<void> {
+        await this.pgClient.connect();;
         if (isDelTable) {
             await this.DelTable();
         }
-        await this.createTable();
-        await this.writeToDB(21, 50, true);
-        await this.readAllDB();
-       // await this.readLastDB();
+        await this. createTable();
+        return new Promise<void>((resolve, reject) => {
+            resolve();
+            console.log('table check ok');
+        });
+
     }
 
-    async connectDB() {
-        await this.pgClient.connect();
-    }
 
-    async DelTable() {
+    //delete table
+    async DelTable(): Promise<void> {
         await this.pgClient.query(this.dropTableCmd);
+        return new Promise<void>((resolve, reject) => {
+            resolve();
+        });
+
     }
     //create table
-    async createTable() {
+    async createTable(): Promise<void> {
 
         await this.pgClient.query(this.createTableCmd);
-        //  await this.pgClient.end()
+        return new Promise<void>((resolve, reject) => {
+            resolve();
+        });
     }
 
-
-    async writeToDB(temp: number, hum: number, light: boolean) {
+    async writeToDB(temp: number, hum: number, light: boolean): Promise<void> {
 
         let data = {
             temperature: temp,
@@ -67,11 +74,15 @@ export class PgControl {
         }
 
         await this.pgClient.query(this.insertCmd, [data]);
+        return new Promise<void>((resolve, reject) => {
+            resolve();
+        });
 
     }
 
-    async readAllDB() {
+    async  readAllDB(): Promise<any[]> {
         const res = await this.pgClient.query(this.queryAllCmd);
+        /*
         res.rows.forEach(row => {
             console.log('id=');
             console.log(row.id);
@@ -80,11 +91,21 @@ export class PgControl {
             console.log('savetime=');
             console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
+        */
+        return new Promise<any[]>((resolve, reject) => {
+            if (res.rows.length > 0) {
+                resolve(res.rows)
+            }
+            else {
+                reject([])
+            }
+        });
     }
 
 
-    async readFistDB() {
+    async readFistDB(): Promise<any[]> {
         const res = await this.pgClient.query(this.queryFirstCmd);
+        /*
         res.rows.forEach(row => {
             console.log('id=');
             console.log(row.id);
@@ -93,10 +114,20 @@ export class PgControl {
             console.log('savetime=');
             console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
+        */
+        return new Promise<any[]>((resolve, reject) => {
+            if (res.rows.length > 0) {
+                resolve(res.rows)
+            }
+            else {
+                reject([])
+            }
+        });
     }
 
-    async readLastDB() {
+    async readLastDB(): Promise<any[]> {
         const res = await this.pgClient.query(this.queryLastCmd);
+        /*
         res.rows.forEach(row => {
             console.log('id=');
             console.log(row.id);
@@ -105,11 +136,24 @@ export class PgControl {
             console.log('savetime=');
             console.log((new Date(row.savetime)).toLocaleString('zh-tw'));
         });
+*/
+        return new Promise<any[]>((resolve, reject) => {
+            if (res.rows.length > 0) {
+                resolve(res.rows)
+            }
+            else {
+                reject([])
+            }
+        });
+
+
     }
 
-    async delAll() {
+    async delAll(): Promise<void> {
         const res = await this.pgClient.query(this.delAllCmd);
-
+        return new Promise<void>((resolve, reject) => {
+            resolve();
+        });
     }
 
 }

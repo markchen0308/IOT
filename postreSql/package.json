@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^10.7.1",
     "@types/pg": "^7.4.10",
     "pg": "^7.4.3"
   }

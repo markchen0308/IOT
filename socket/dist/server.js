@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Net = require("net");
+const Net = require("net"); //import socket module
 let HOST = '127.0.0.1';
 let PORT = 6969;
 let preamble = 0x55;
