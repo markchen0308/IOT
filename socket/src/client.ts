@@ -38,6 +38,7 @@ function writeData(temp: number, humid: number) {
     }
 }
 
+
 setTimeout(() => {
     clientControl();
     //send data per 1 second
