@@ -114,14 +114,14 @@ function WebserverServerStart() {
         console.log('web server  client connect.');
         webServerSocket = sock;//save webserver socket
 
-        //ble client disconnected
+        //webserver client disconnected
         sock.on('close', (error) => {
             console.log('Webserver client disconnected!')
             webServerSocket = null;
 
         })
 
-        // receive data from ble client
+        // receive data from webserver client
         sock.on('data', (data) => {
             parserWebserverClientData(data) ;
             //parser protocol from web server
@@ -174,6 +174,7 @@ function writeSensorDataNow2WebserverClient()
     let cmdData:string=temperature.toString(10)+";"+humidity.toString(10)+";"+pirValue.toString(10);
     write2WebserverClient("SensorDataNow", cmdData);
 }
+
 function writeLightControlNow2WebserverClient(cmdtype:string,cmdData:string)
 {
     write2WebserverClient(cmdtype, cmdData);

@@ -86,12 +86,12 @@ function WebserverServerStart() {
     Net.createServer((sock) => {
         console.log('web server  client connect.');
         webServerSocket = sock; //save webserver socket
-        //ble client disconnected
+        //webserver client disconnected
         sock.on('close', (error) => {
             console.log('Webserver client disconnected!');
             webServerSocket = null;
         });
-        // receive data from ble client
+        // receive data from webserver client
         sock.on('data', (data) => {
             parserWebserverClientData(data);
             //parser protocol from web server
